@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Software 2 — Envio de Recibos DCTFWeb | Pier</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-dark:#8A6B28;--gold-bg:#FAF5E8;--gold-border:#E0C870;
+  --bg-primary:#ffffff;--bg-secondary:#f6f6f4;--bg-tertiary:#f0efed;
+  --text-primary:#1a1a18;--text-secondary:#6b6b66;--text-tertiary:#9e9e98;
+  --border-t:rgba(0,0,0,0.10);--border-s:rgba(0,0,0,0.18);
+  --success-bg:#eaf3de;--success-text:#3b6d11;--success-border:#97c459;
+  --danger-bg:#fcebeb;--danger-text:#a32d2d;--danger-border:#f09595;
+  --warning-bg:#faeeda;--warning-text:#854f0b;--warning-border:#ef9f27;
+  --info-bg:#e6f1fb;--info-text:#185fa5;--info-border:#85b7eb;
+  --radius-md:8px;--radius-lg:12px;
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg-primary:#1c1c1a;--bg-secondary:#252523;--bg-tertiary:#2e2e2b;
+    --text-primary:#f0efed;--text-secondary:#a8a89f;--text-tertiary:#6b6b66;
+    --border-t:rgba(255,255,255,0.08);--border-s:rgba(255,255,255,0.15);
+    --success-bg:#173404;--success-text:#97c459;--success-border:#3b6d11;
+    --danger-bg:#501313;--danger-text:#f09595;--danger-border:#a32d2d;
+    --warning-bg:#412402;--warning-text:#ef9f27;--warning-border:#854f0b;
+    --info-bg:#042c53;--info-text:#85b7eb;--info-border:#185fa5;
+    --gold-bg:#2a2010;--gold-dark:#E8CC7A;--gold-border:#5a4518;
+  }
+}
+body{font-family:var(--font-sans);font-size:14px;color:var(--text-primary);background:var(--bg-tertiary);min-height:100vh;padding:1.5rem 1rem}
+.container{max-width:780px;margin:0 auto}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+
+.hero{background:var(--bg-primary);border:0.5px solid var(--border-t);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.hero-logo{height:42px;width:auto}
+.hero-title{font-size:11px;color:var(--text-secondary);letter-spacing:.07em;text-transform:uppercase;margin-top:3px}
+.hero-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--gold-bg);color:var(--gold-dark);border:0.5px solid var(--gold-border)}
+.pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid var(--border-t);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.card{background:var(--bg-primary);border:0.5px solid var(--border-t);border-radius:var(--radius-lg);padding:1.125rem 1.375rem;margin-bottom:.75rem}
+.section-label{font-size:11px;font-weight:500;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.625rem;display:flex;align-items:center;gap:6px}
+.section-label i{font-size:14px}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;color:var(--text-secondary);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.field input{width:100%;font-size:13px;padding:8px 10px;border:0.5px solid var(--border-s);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);outline:none;transition:border-color .15s}
+.field input:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.15)}
+.field.span2{grid-column:1/-1}
+
+.drop{border:1.5px dashed var(--gold-border);border-radius:var(--radius-lg);padding:1.75rem;text-align:center;cursor:pointer;background:var(--gold-bg);transition:background .15s;margin-top:.75rem}
+.drop:hover,.drop.over{background:#F0E3C0}
+.drop-icon{font-size:32px;color:var(--gold);margin-bottom:6px}
+.drop p{font-size:13px;color:var(--gold-dark);font-weight:500}
+.drop small{font-size:11px;color:var(--text-tertiary);margin-top:3px;display:block}
+
+.metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:.75rem 0}
+.mcard{background:var(--bg-secondary);border-radius:var(--radius-md);padding:.75rem .875rem}
+.mcard .num{font-size:22px;font-weight:500;line-height:1.1}
+.mcard .lbl{font-size:10px;color:var(--text-secondary);margin-top:2px}
+.mcard.gold .num{color:var(--gold-dark)}
+.mcard.ok .num{color:var(--success-text)}
+.mcard.skip .num{color:var(--info-text)}
+.mcard.warn .num{color:var(--warning-text)}
+.mcard.err .num{color:var(--danger-text)}
+
+.prog-bar{height:3px;background:var(--border-t);border-radius:2px;margin:.625rem 0}
+.prog-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .35s ease}
+
+.table-wrap{border:0.5px solid var(--border-t);border-radius:var(--radius-md);overflow:hidden;margin-top:.75rem;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;min-width:500px}
+thead{background:var(--bg-secondary)}
+th{padding:7px 10px;text-align:left;font-weight:500;color:var(--text-secondary);font-size:11px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+td{padding:7px 10px;border-top:0.5px solid var(--border-t);color:var(--text-primary);vertical-align:middle}
+tr:hover td{background:var(--bg-secondary)}
+
+.pill{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;white-space:nowrap;display:inline-flex;align-items:center;gap:3px}
+.p-ok{background:var(--success-bg);color:var(--success-text)}
+.p-err{background:var(--danger-bg);color:var(--danger-text)}
+.p-skip{background:var(--warning-bg);color:var(--warning-text)}
+.p-info{background:var(--info-bg);color:var(--info-text)}
+.p-gray{background:var(--bg-secondary);color:var(--text-secondary)}
+.p-gold{background:var(--gold-bg);color:var(--gold-dark);border:0.5px solid var(--gold-border)}
+
+.log-box{background:var(--bg-primary);border:0.5px solid var(--border-t);border-radius:var(--radius-lg);overflow:hidden;margin-top:.75rem}
+.log-head{padding:.625rem 1rem;border-bottom:0.5px solid var(--border-t);display:flex;align-items:center;justify-content:space-between}
+.log-head-title{font-size:11px;font-weight:500;color:var(--text-secondary);letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;gap:5px}
+.log-body{padding:.625rem 1rem;max-height:220px;overflow-y:auto;font-family:var(--font-mono);font-size:11px;line-height:1.85}
+.ll{display:flex;gap:8px}
+.lt{color:var(--text-tertiary);flex-shrink:0;width:56px;font-size:10px}
+.lok{color:var(--success-text)}
+.lerr{color:var(--danger-text)}
+.lwarn{color:var(--warning-text)}
+.linfo{color:var(--text-secondary)}
+.lgold{color:var(--gold-dark);font-weight:500}
+
+.btn-gold{width:100%;padding:10px;font-size:13px;font-weight:500;background:var(--gold);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;letter-spacing:.02em;transition:background .15s;margin-top:.75rem;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-gold:hover{background:var(--gold-dark)}
+.btn-gold:disabled{opacity:.4;cursor:not-allowed}
+.btn-sm{padding:5px 12px;font-size:11px;background:none;border:0.5px solid var(--border-s);border-radius:var(--radius-md);cursor:pointer;color:var(--text-secondary);display:inline-flex;align-items:center;gap:4px}
+.btn-sm:hover{background:var(--bg-secondary)}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem}
+.step-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px}
+.step-bar{flex:1;height:6px;background:var(--bg-secondary);border-radius:3px;overflow:hidden}
+.step-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.step-lbl{width:72px;color:var(--text-secondary);text-align:right;font-size:11px;flex-shrink:0}
+.step-val{width:24px;text-align:right;font-weight:500;font-size:11px;flex-shrink:0}
+.donut-wrap{display:flex;align-items:center;gap:1rem}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:7px}
+.dleg{display:flex;align-items:center;gap:7px;font-size:11px}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+.footer{border-top:0.5px solid var(--border-t);padding-top:.75rem;margin-top:.75rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.footer-logo{height:16px;opacity:.45;filter:grayscale(1)}
+</style>
+</head>
+<body>
+<div class="container">
+<h1 class="sr-only">Software 2 — Envio automático de recibos DCTFWeb para o Pier</h1>
+<div id="file-pick" style="display:none"><input type="file" id="fi" accept=".zip" onchange="onZip(this)"></div>
+
+<div id="vconfig">
+  <div class="hero">
+    <div>
+      <div id="logo-empresa" style="width:42px;height:42px;background:var(--gold-bg);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold)"><i class="ti ti-building"></i></div>
+      <div class="hero-title">Software 2 — envio de recibos DCTFWeb</div>
+    </div>
+    <div style="text-align:right">
+      <div class="hero-badge"><span class="pulse"></span> Pronto</div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-top:5px" id="clk"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label"><i class="ti ti-lock"></i>Acesso ao Pier</div>
+    <div class="form-grid">
+      <div class="field"><label>URL da API</label><input type="text" id="api-url" placeholder="https://pier-proxy.SEU-USUARIO.workers.dev" value="https://pier-proxy.SEU-USUARIO.workers.dev"></div>
+      <div class="field"><label>Competência (MMAAAA)</label><input type="text" id="competencia" placeholder="042026" maxlength="6"></div>
+      <div class="field"><label>Usuário (e-mail)</label><input type="email" id="usuario" placeholder="seu@email.com"></div>
+      <div class="field"><label>Senha</label><input type="password" id="senha" placeholder="••••••••"></div>
+      <div class="field span2"><label>Mensagem padrão</label><input type="text" id="mensagem" value="Segue em anexo o Recibo de Entrega da DCTFWeb referente à competência {comp}, declarado como Sem Movimento."></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label"><i class="ti ti-file-zip"></i>Arquivo ZIP do Software 1</div>
+    <div class="drop" id="drop"
+      onclick="document.getElementById('fi').click()"
+      ondragover="event.preventDefault();this.classList.add('over')"
+      ondragleave="this.classList.remove('over')"
+      ondrop="onDrop(event)">
+      <div class="drop-icon"><i class="ti ti-file-zip"></i></div>
+      <p>Arraste o ZIP aqui ou clique para selecionar</p>
+      <small>Estrutura esperada: RazaoSocial_CNPJ / 2026 / MM / CNPJ_RazaoSocial_MM-AAAA.pdf</small>
+    </div>
+    <div id="zip-preview" style="display:none;margin-top:.75rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+        <span id="zip-name" style="font-size:12px;font-weight:500;color:var(--text-secondary)"></span>
+        <button class="btn-sm" onclick="clearZip()"><i class="ti ti-x"></i> Remover</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th style="width:34%">CNPJ</th>
+            <th style="width:30%">Razão social</th>
+            <th style="width:18%">Competência</th>
+            <th style="width:18%">Validação</th>
+          </tr></thead>
+          <tbody id="zip-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-gold" id="btn-send" onclick="startProcess()" disabled>
+    <i class="ti ti-send"></i>Validar e enviar ao Pier
+  </button>
+
+  <div class="footer">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:11px;color:var(--text-tertiary)">Desenvolvido por Tech Legacy</span>
+    </div>
+    <span style="font-size:11px;color:var(--text-tertiary)" id="footer-ts"></span>
+  </div>
+</div>
+
+<div id="vrun" style="display:none">
+  <div class="hero">
+    <div>
+      <div style="width:42px;height:42px;background:var(--gold-bg);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold)"><i class="ti ti-building"></i></div>
+      <div class="hero-title">Processando envios</div>
+    </div>
+    <div style="text-align:right">
+      <div class="hero-badge" id="run-badge"><span class="spinner"></span> <span id="run-lbl">Iniciando...</span></div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-top:5px" id="run-comp"></div>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="mcard gold"><div class="num" id="m-total">0</div><div class="lbl">Total</div></div>
+    <div class="mcard ok"><div class="num" id="m-ok">0</div><div class="lbl">Enviados</div></div>
+    <div class="mcard skip"><div class="num" id="m-skip">0</div><div class="lbl">Já tinham recibo</div></div>
+    <div class="mcard warn"><div class="num" id="m-warn">0</div><div class="lbl">Ignorados</div></div>
+    <div class="mcard err"><div class="num" id="m-err">0</div><div class="lbl">Erros</div></div>
+  </div>
+
+  <div class="prog-bar"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+  <div class="two-col">
+    <div class="card" style="margin-bottom:0">
+      <div class="section-label"><i class="ti ti-chart-donut"></i>Resultado</div>
+      <div class="donut-wrap">
+        <canvas id="donut" width="80" height="80"></canvas>
+        <div class="donut-legend">
+          <div class="dleg"><div class="dot" style="background:#4ade80"></div><span style="flex:1;color:var(--text-secondary)">Enviados</span><span id="dl-ok" style="font-weight:500">0</span></div>
+          <div class="dleg"><div class="dot" style="background:#60a5fa"></div><span style="flex:1;color:var(--text-secondary)">Já tinham recibo</span><span id="dl-skip" style="font-weight:500">0</span></div>
+          <div class="dleg"><div class="dot" style="background:#facc15"></div><span style="flex:1;color:var(--text-secondary)">Ignorados</span><span id="dl-warn" style="font-weight:500">0</span></div>
+          <div class="dleg"><div class="dot" style="background:#f87171"></div><span style="flex:1;color:var(--text-secondary)">Erros</span><span id="dl-err" style="font-weight:500">0</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="section-label"><i class="ti ti-timeline"></i>Progresso por etapa</div>
+      <div id="step-bars"></div>
+    </div>
+  </div>
+
+  <div class="log-box">
+    <div class="log-head">
+      <div class="log-head-title"><i class="ti ti-terminal-2"></i>Log de execução</div>
+      <button class="btn-sm" onclick="document.getElementById('log-body').innerHTML=''"><i class="ti ti-trash"></i> Limpar</button>
+    </div>
+    <div class="log-body" id="log-body"></div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th style="width:26%">CNPJ</th>
+        <th style="width:28%">Cliente</th>
+        <th style="width:28%">Nº Solicitação</th>
+        <th style="width:18%">Resultado</th>
+      </tr></thead>
+      <tbody id="result-tbody"></tbody>
+    </table>
+  </div>
+
+  <button class="btn-gold" onclick="goConfig()">
+    <i class="ti ti-refresh"></i>Novo envio
+  </button>
+
+  <div class="footer">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:11px;color:var(--text-tertiary)">Desenvolvido por Tech Legacy</span>
+    </div>
+    <span style="font-size:11px;color:var(--text-tertiary)" id="run-ts"></span>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const TRIBUTOS=['cofins','cosirf','cpss','csll','csrf','iof','ipi','irpj','irrf','pis','ret/pagamento unificado'];
+let zipEntries=[],token=null,stats={ok:0,skip:0,warn:0,err:0};
+
+function gv(id){return document.getElementById(id).value.trim();}
+function tick(){const n=new Date();const el=document.getElementById('clk');if(el)el.textContent=n.toLocaleDateString('pt-BR')+' · '+n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+tick();setInterval(tick,30000);
+function fmtComp(r){return r?r.slice(0,2)+'/'+r.slice(2):'';}
+
+// Fallback: extrai CNPJ do nome do arquivo caso o PDF não seja legível.
+// Aceita CNPJs numéricos (14 dígitos) e alfanuméricos (novo padrão RF jul/2026).
+function extractCnpjFallback(path){
+  const parts=path.split('/');
+  for(const p of parts){
+    const fname=p.replace(/\.pdf$/i,'');
+    // Tenta padrão com máscara (XX.XXX.XXX/XXXX-XX ou alfanumérico)
+    const mMask=fname.match(/[A-Z0-9]{2}\.[A-Z0-9]{3}\.[A-Z0-9]{3}\/[A-Z0-9]{4}-[A-Z0-9]{2}/i);
+    if(mMask)return mMask[0].toUpperCase();
+    // Tenta sequência de 14 dígitos numéricos (legado)
+    for(const s of fname.split('_')){if(/^\d{14}$/.test(s))return s;}
+  }
+  return null;
+}
+
+// Formata CNPJ numérico legado para exibição: 14 dígitos → XX.XXX.XXX/XXXX-XX
+function formatCnpj(raw){
+  if(!raw)return'—';
+  const d=raw.replace(/\D/g,'');
+  if(d.length===14)return d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5');
+  return raw; // alfanumérico já vem formatado
+}
+
+// Extrai CNPJ (alfanumérico ou numérico), Razão Social e Competência do PDF.
+// Usa lógica POSICIONAL: busca o bloco entre 'CNPJ/CPF' e 'Período de apuração'
+// para isolar o campo 'Nome' (razão social) — evitando capturar o nome do
+// representante que aparece mais abaixo com o mesmo label.
+function extractMetadadosPdf(text){
+  // --- CNPJ: aceita alfanumérico (XX.XXX.XXX/XXXX-XX, letras maiúsculas) ---
+  let cnpj=null;
+  const mCnpj=text.match(/CNPJ\/CPF\s+([A-Z0-9]{2}\.[A-Z0-9]{3}\.[A-Z0-9]{3}\/[A-Z0-9]{4}-[A-Z0-9]{2})/i);
+  if(mCnpj)cnpj=mCnpj[1].toUpperCase();
+
+  // --- RAZÃO SOCIAL: bloco entre CNPJ/CPF e Período de apuração ---
+  let nome=null;
+  const mBloco=text.match(/CNPJ\/CPF\s+[A-Z0-9.\/\-]+([\s\S]+?)Per[íi]odo de apura/i);
+  if(mBloco){
+    const bloco=mBloco[1];
+    // Campo 'Nome' dentro desse bloco
+    const mNome=bloco.match(/Nome\s+([^\n]+)/);
+    if(mNome)nome=mNome[1].trim().replace(/\s+/g,' ');
+  }
+
+  // --- COMPETÊNCIA: MM/AAAA → MMAAAA ---
+  let comp=null;
+  const mComp=text.match(/Per[íi]odo de apura[çc][ãa]o\s*(\d{2})\/(\d{4})/);
+  if(mComp)comp=mComp[1]+mComp[2];
+
+  return{cnpj,nome,comp};
+}
+
+async function extractPdfText(ab){
+  const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+  let text='';
+  for(let i=1;i<=pdf.numPages;i++){
+    const pg=await pdf.getPage(i);
+    const ct=await pg.getTextContent();
+    text+=ct.items.map(it=>it.str).join('\n')+'\n';
+  }
+  return text;
+}
+
+function validarSemMovimento(text){
+  const lines=text.split('\n');
+  const ini=lines.findIndex(l=>l.toLowerCase().includes('totaliza'));
+  if(ini<0)return{ok:false,motivo:'Seção de totalização não encontrada'};
+  const probs=[];
+  for(const linha of lines.slice(ini)){
+    const ll=linha.toLowerCase().trim();
+    for(const t of TRIBUTOS){
+      if(ll.startsWith(t)){
+        for(const v of [...linha.matchAll(/R\$\s*([\d.]+,\d{2})/g)]){
+          if(parseFloat(v[1].replace(/\./g,'').replace(',','.'))<0.01)continue;
+          probs.push(t.toUpperCase()+': '+linha.trim());
+        }
+        break;
+      }
+    }
+  }
+  return{ok:probs.length===0,motivo:probs.join('; ')};
+}
+
+function onDrop(e){
+  e.preventDefault();document.getElementById('drop').classList.remove('over');
+  const f=[...e.dataTransfer.files].find(f=>f.name.toLowerCase().endsWith('.zip'));
+  if(f)loadZip(f);else alert('Por favor selecione um arquivo .zip');
+}
+function onZip(el){if(el.files[0])loadZip(el.files[0]);el.value='';}
+function clearZip(){
+  zipEntries=[];
+  document.getElementById('zip-preview').style.display='none';
+  document.getElementById('btn-send').disabled=true;
+  document.getElementById('drop').style.display='';
+}
+
+async function loadZip(file){
+  document.getElementById('drop').style.display='none';
+  document.getElementById('zip-name').textContent=file.name+' ('+Math.round(file.size/1024)+' KB)';
+  document.getElementById('zip-preview').style.display='';
+  const tbody=document.getElementById('zip-tbody');
+  tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-tertiary);padding:16px"><span class="spinner"></span> Lendo e validando PDFs...</td></tr>';
+
+  try{
+    const ab=await file.arrayBuffer();
+    const zip=await JSZip.loadAsync(ab);
+    zipEntries=[];
+    const pdfFiles=Object.keys(zip.files).filter(n=>n.toLowerCase().endsWith('.pdf')&&!zip.files[n].dir);
+    if(pdfFiles.length===0){tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-tertiary);padding:16px">Nenhum PDF encontrado no ZIP.</td></tr>';return;}
+
+    for(const path of pdfFiles){
+      const pdfAb=await zip.files[path].async('arraybuffer');
+      let cnpj=null,razao=null,comp=null,valido=true,motivo='';
+      try{
+        const txt=await extractPdfText(pdfAb);
+        // Extrai metadados direto do conteúdo do PDF
+        const meta=extractMetadadosPdf(txt);
+        cnpj=meta.cnpj||extractCnpjFallback(path);
+        razao=meta.nome||'—';
+        comp=meta.comp||null;
+        const r=validarSemMovimento(txt);
+        valido=r.ok;motivo=r.motivo;
+      }catch(e){
+        cnpj=extractCnpjFallback(path);
+        razao='—';valido=false;motivo='Erro ao ler PDF: '+e.message;
+      }
+      zipEntries.push({path,cnpj,razao,comp,pdfAb,valido,motivo});
+    }
+
+    tbody.innerHTML='';
+    for(const e of zipEntries){
+      const cnpjFmt=e.cnpj
+        ?e.cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5')
+        :'<span style="color:var(--danger-text)">não encontrado</span>';
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td style="font-family:monospace;font-size:11px">${cnpjFmt}</td>
+      <td style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0" title="${e.razao}">${e.razao||'—'}</td>
+      <td style="font-size:12px">${e.comp?fmtComp(e.comp):'—'}</td>
+      <td>${e.valido
+        ?'<span class="pill p-ok"><i class="ti ti-check"></i>Válido</span>'
+        :'<span class="pill p-err" title="'+e.motivo+'"><i class="ti ti-alert-circle"></i>Inválido</span>'
+      }</td>`;
+      tbody.appendChild(tr);
+    }
+    document.getElementById('btn-send').disabled=zipEntries.filter(e=>e.valido&&e.cnpj).length===0;
+  }catch(ex){
+    tbody.innerHTML='<tr><td colspan="4" style="color:var(--danger-text);padding:12px">Erro ao ler ZIP: '+ex.message+'</td></tr>';
+  }
+}
+
+function classifyError(e){
+  const msg=(e&&(e.message||String(e)))||'';
+  if(msg.toLowerCase().includes('failed to fetch')||msg.toLowerCase().includes('networkerror'))
+    return'[Rede] Sem conexão ou servidor inacessível';
+  if(msg.toLowerCase().includes('cors'))
+    return'[CORS] O servidor bloqueou a requisição — verifique a URL da API';
+  if(msg.match(/http 401/i))return'[Auth] Credenciais inválidas (401)';
+  if(msg.match(/http 403/i))return'[Auth] Acesso negado (403)';
+  if(msg.match(/http 404/i))return'[HTTP] Recurso não encontrado (404)';
+  if(msg.match(/http 5\d\d/i))return'[HTTP] Erro interno do servidor (5xx)';
+  if(msg.match(/http \d+/i))return`[HTTP] ${msg}`;
+  return`[Erro] ${msg}`;
+}
+function log(msg,type='info'){
+  const el=document.getElementById('log-body');
+  const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const d=document.createElement('div');d.className='ll';
+  d.innerHTML=`<span class="lt">${t}</span><span class="l${type}">${msg}</span>`;
+  el.appendChild(d);el.scrollTop=el.scrollHeight;
+}
+function logErr(contexto,e){
+  log(contexto+': '+classifyError(e),'err');
+}
+function setLbl(t){document.getElementById('run-lbl').textContent=t;}
+function setProgress(p){document.getElementById('prog').style.width=Math.min(100,p)+'%';}
+function upMetrics(){
+  document.getElementById('m-ok').textContent=stats.ok;
+  document.getElementById('m-skip').textContent=stats.skip;
+  document.getElementById('m-warn').textContent=stats.warn;
+  document.getElementById('m-err').textContent=stats.err;
+  document.getElementById('dl-ok').textContent=stats.ok;
+  document.getElementById('dl-skip').textContent=stats.skip;
+  document.getElementById('dl-warn').textContent=stats.warn;
+  document.getElementById('dl-err').textContent=stats.err;
+  drawDonut();
+}
+function drawDonut(){
+  const c=document.getElementById('donut');if(!c)return;
+  const ctx=c.getContext('2d');
+  const tot=stats.ok+stats.skip+stats.warn+stats.err||1;
+  const sl=[{v:stats.ok,c:'#4ade80'},{v:stats.skip,c:'#60a5fa'},{v:stats.warn,c:'#facc15'},{v:stats.err,c:'#f87171'}];
+  ctx.clearRect(0,0,80,80);
+  let s=-Math.PI/2;
+  sl.forEach(x=>{const a=(x.v/tot)*Math.PI*2;ctx.beginPath();ctx.moveTo(40,40);ctx.arc(40,40,36,s,s+a);ctx.closePath();ctx.fillStyle=x.c;ctx.fill();s+=a;});
+  ctx.beginPath();ctx.arc(40,40,22,0,Math.PI*2);ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim()||'#fff';ctx.fill();
+  ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim()||'#111';
+  ctx.font='500 12px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(stats.ok+stats.skip+stats.warn+stats.err,40,40);
+}
+function addStepBar(lbl,v,max,color){
+  const pct=max>0?Math.round((v/max)*100):0;
+  document.getElementById('step-bars').innerHTML+=`<div class="step-row">
+    <span class="step-lbl">${lbl}</span>
+    <div class="step-bar"><div class="step-fill" style="width:${pct}%;background:${color}"></div></div>
+    <span class="step-val">${v}</span>
+  </div>`;
+}
+function addResultRow(cnpj,nome,codSol,titSol,pill){
+  const solDisplay=codSol?`<span style="font-family:monospace;font-weight:600">${codSol}</span>${titSol?' <span style="color:var(--text-tertiary);font-size:10px">'+titSol+'</span>':''}` :(titSol||'—');
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="font-family:monospace;font-size:11px">${formatCnpj(cnpj)}</td>
+  <td style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0" title="${nome}">${nome||'—'}</td>
+  <td style="font-size:12px">${solDisplay}</td>
+  <td>${pill}</td>`;
+  document.getElementById('result-tbody').appendChild(tr);
+}
+
+async function apiGet(path,params={}){
+  const url=new URL(gv('api-url')+path);
+  Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
+  const r=await fetch(url,{headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'}});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}
+async function apiPost(path,body,isForm=false){
+  const h={Authorization:'Bearer '+token};
+  if(!isForm)h['Content-Type']='application/json';
+  const r=await fetch(gv('api-url')+path,{method:'POST',headers:h,body:isForm?body:JSON.stringify(body)});
+  if(!r.ok)throw new Error('HTTP '+r.status+': '+await r.text());
+  return r.json();
+}
+async function getAllPages(path,extra={}){
+  let pg=1,all=[];
+  while(true){
+    const d=await apiGet(path,{...extra,pagina:pg});
+    const itens=d.itens||d.data||d.items||(Array.isArray(d)?d:[]);
+    all=[...all,...itens];
+    const tot=d.total||d.totalItens||all.length;
+    const por=d.itensPorPagina||d.pageSize||itens.length||1;
+    if(pg*por>=tot||!itens.length)break;
+    pg++;
+  }
+  return all;
+}
+
+async function checkJaTemRecibo(idSol,cnpj,compMM,compAAAA){
+  try{
+    const arquivos=await getAllPages('/api/v2/solicitacoes/'+idSol+'/arquivos');
+    const re=new RegExp(cnpj+'|'+compMM+'.?'+compAAAA,'i');
+    const found=arquivos.find(a=>{const n=(a.nome||a.nomeArquivo||a.fileName||'').toLowerCase();return n.endsWith('.pdf')&&(re.test(n)||n.includes('recibo'));});
+    if(found)return{tem:true,nome:found.nome||found.nomeArquivo||'arquivo'};
+    const postagens=await getAllPages('/api/v2/solicitacoes/'+idSol+'/postagens');
+    for(const p of postagens){
+      const anexos=[...(p.arquivos||[]),...(p.anexos||[])];
+      const fa=anexos.find(a=>{const n=(a.nome||a.nomeArquivo||a.fileName||'').toLowerCase();return n.endsWith('.pdf')&&(n.includes('recibo')||n.includes(cnpj)||re.test(n));});
+      if(fa)return{tem:true,nome:fa.nome||fa.nomeArquivo||'recibo em postagem'};
+    }
+    return{tem:false};
+  }catch(e){return{tem:false,erro:e.message};}
+}
+
+function goConfig(){
+  document.getElementById('vconfig').style.display='';
+  document.getElementById('vrun').style.display='none';
+}
+
+async function startProcess(){
+  const comp=gv('competencia');
+  if(!gv('usuario')||!gv('senha')){alert('Preencha usuário e senha.');return;}
+  if(!/^\d{6}$/.test(comp)){alert('Competência inválida. Use o formato MMAAAA — ex: 042026.');return;}
+
+  document.getElementById('vconfig').style.display='none';
+  document.getElementById('vrun').style.display='';
+  document.getElementById('result-tbody').innerHTML='';
+  document.getElementById('step-bars').innerHTML='';
+  document.getElementById('run-badge').innerHTML='<span class="spinner"></span> <span id="run-lbl">Iniciando...</span>';
+  document.getElementById('run-comp').textContent='Competência '+fmtComp(comp);
+  document.getElementById('run-ts').textContent='Iniciado em '+new Date().toLocaleTimeString('pt-BR');
+  stats={ok:0,skip:0,warn:0,err:0};
+
+  const validos=zipEntries.filter(e=>e.valido&&e.cnpj);
+  document.getElementById('m-total').textContent=validos.length;
+  upMetrics();
+
+  const compFmt=fmtComp(comp);
+  const compMM=comp.slice(0,2);
+  const compAAAA=comp.slice(2);
+  const msg=gv('mensagem').replace('{comp}',compFmt);
+  const titleRe=new RegExp('DCTFWEB.*MIT.*'+compMM+'[/\\-]?'+compAAAA+'|LP.*DCTFWEB.*MIT.*'+compMM+'[/\\-]'+compAAAA,'i');
+
+  log('Processo iniciado — competência '+compFmt,'gold');
+  setLbl('Autenticando...');setProgress(5);
+
+  try{
+    const r=await fetch(gv('api-url')+'/api/v2/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:gv('usuario'),senha:gv('senha')})});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    token=d.token||d.accessToken||d.access_token;
+    if(!token)throw new Error('Token não retornado: '+JSON.stringify(d));
+    log('Autenticação realizada com sucesso','ok');
+  }catch(e){
+    logErr('Autenticação',e);
+    document.getElementById('run-badge').innerHTML='<i class="ti ti-alert-circle"></i> Falha na autenticação';
+    setProgress(100);return;
+  }
+
+  setLbl('Carregando clientes...');setProgress(15);
+  let clientes=[];
+  try{clientes=await getAllPages('/api/v2/clientes');log(clientes.length+' clientes carregados','ok');}
+  catch(e){logErr('Busca de clientes',e);setProgress(100);return;}
+
+  setLbl('Processando...');setProgress(25);
+
+  for(let i=0;i<validos.length;i++){
+    const entry=validos[i];
+    setProgress(25+Math.round((i/validos.length)*70));
+    setLbl('Enviando '+(i+1)+'/'+validos.length+'...');
+    log('─────────────────────────────','info');
+    log('['+(i+1)+'/'+validos.length+'] '+formatCnpj(entry.cnpj),'gold');
+
+    const cliente=clientes.find(c=>(c.cnpj||'').replace(/\D/g,'')==entry.cnpj);
+    if(!cliente){
+      log('  Cliente não encontrado no Pier','err');
+      stats.err++;upMetrics();
+      addResultRow(entry.cnpj,entry.razao||'—','','','<span class="pill p-err"><i class="ti ti-user-x"></i>Sem cliente</span>');
+      continue;
+    }
+    const idCliente=String(cliente.id||cliente.idCliente||'');
+    const nomeCliente=cliente.nome||cliente.razaoSocial||entry.cnpj;
+    log('  Cliente: '+nomeCliente,'info');
+
+    let sols=[];
+    try{sols=await getAllPages('/api/v2/solicitacoes',{idCliente});}
+    catch(e){logErr('  Busca de solicitações',e);stats.err++;upMetrics();addResultRow(entry.cnpj,nomeCliente,'','','<span class="pill p-err">Erro API</span>');continue;}
+
+    const abertas=sols.filter(s=>!['finaliz','encerr','fechad'].some(x=>(s.status||'').toLowerCase().includes(x)));
+    const candidatas=abertas.filter(s=>{
+      const tit=s.titulo||s.assunto||'';
+      return titleRe.test(tit)||(tit.toUpperCase().includes('DCTFWEB')&&tit.includes(compMM+'/'+compAAAA));
+    });
+
+    if(candidatas.length===0){
+      log('  Nenhuma solicitação "DCTFWEB/ MIT - '+compMM+'/'+compAAAA+'" em aberto','err');
+      stats.err++;upMetrics();
+      addResultRow(entry.cnpj,nomeCliente,'','','<span class="pill p-err"><i class="ti ti-file-x"></i>Sem solicitação</span>');
+      continue;
+    }
+    if(candidatas.length>1){
+      log('  Ambiguidade: '+candidatas.length+' solicitações — ação manual necessária','err');
+      candidatas.forEach((s,idx)=>log('    ['+(idx+1)+'] id='+s.id+' — "'+(s.titulo||s.assunto)+'"','err'));
+      stats.err++;upMetrics();
+      addResultRow(entry.cnpj,nomeCliente,'','Múltiplas','<span class="pill p-err"><i class="ti ti-alert-triangle"></i>Ambíguo</span>');
+      continue;
+    }
+
+    const sol=candidatas[0];
+    const idSol=String(sol.id||sol.idSolicitacao||'');
+    const titSol=sol.titulo||sol.assunto||'';
+    // Código visível da solicitação (ex: 8BFE-67) — tenta campos comuns da API
+    const codSol=sol.codigo||sol.codigoSolicitacao||sol.numero||sol.numeroPier||'';
+    log('  Solicitação: '+( codSol?'Nº '+codSol+' — ':'')+'"'+titSol+'" (id='+idSol+')','info');
+
+    log('  Verificando recibos existentes...','info');
+    const check=await checkJaTemRecibo(idSol,entry.cnpj,compMM,compAAAA);
+    if(check.tem){
+      log('  Recibo já encontrado: "'+check.nome+'" — pulando','warn');
+      stats.skip++;upMetrics();
+      addResultRow(entry.cnpj,nomeCliente,codSol,titSol,'<span class="pill p-info"><i class="ti ti-paperclip"></i>Já enviado</span>');
+      continue;
+    }
+    if(check.erro)log('  Aviso na verificação de anexos: '+check.erro,'warn');
+    log('  Sem recibo anterior — enviando','ok');
+
+    try{
+      const blob=new Blob([entry.pdfAb],{type:'application/pdf'});
+      const fname=entry.path.split('/').pop()||entry.cnpj+'_'+compMM+compAAAA+'.pdf';
+      const fd=new FormData();fd.append('arquivo',blob,fname);
+      const r=await fetch(gv('api-url')+'/api/v2/solicitacoes/'+idSol+'/arquivos',{method:'POST',headers:{Authorization:'Bearer '+token},body:fd});
+      if(!r.ok)throw new Error('HTTP '+r.status+': '+await r.text());
+      log('  PDF anexado com sucesso','ok');
+    }catch(e){
+      logErr('  Anexo de PDF',e);
+      stats.err++;upMetrics();
+      addResultRow(entry.cnpj,nomeCliente,codSol,titSol,'<span class="pill p-err">Erro anexo</span>');
+      continue;
+    }
+
+    try{
+      await apiPost('/api/v2/solicitacoes/'+idSol+'/postagens',{mensagem:msg});
+      log('  Mensagem enviada com sucesso','ok');
+      stats.ok++;upMetrics();
+      addResultRow(entry.cnpj,nomeCliente,codSol,titSol,'<span class="pill p-ok"><i class="ti ti-check"></i>Enviado</span>');
+    }catch(e){
+      logErr('  Envio de mensagem',e);
+      stats.err++;upMetrics();
+      addResultRow(entry.cnpj,nomeCliente,codSol,titSol,'<span class="pill p-err">Erro msg</span>');
+    }
+  }
+
+  setProgress(100);
+  addStepBar('Enviados',stats.ok,validos.length,'#4ade80');
+  addStepBar('Já tinham',stats.skip,validos.length,'#60a5fa');
+  if(stats.warn>0)addStepBar('Ignorados',stats.warn,validos.length,'#facc15');
+  if(stats.err>0)addStepBar('Erros',stats.err,validos.length,'#f87171');
+
+  const badge=document.getElementById('run-badge');
+  if(stats.err===0){
+    badge.style.background='var(--success-bg)';badge.style.color='var(--success-text)';badge.style.borderColor='var(--success-border)';
+    badge.innerHTML='<i class="ti ti-circle-check"></i> Concluído com sucesso';
+  }else{
+    badge.innerHTML='<i class="ti ti-alert-triangle"></i> Finalizado com pendências';
+  }
+  log('─────────────────────────────','info');
+  log('Finalizado. Enviados: '+stats.ok+' | Já tinham recibo: '+stats.skip+' | Erros: '+stats.err,'gold');
+  document.getElementById('run-ts').textContent='Concluído em '+new Date().toLocaleTimeString('pt-BR');
+}
+</script>
+</body>
+</html>
